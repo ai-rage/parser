@@ -1,4 +1,4 @@
-# Parser on Python
+import json
 
 import urllib.request
 from bs4 import BeautifulSoup
@@ -17,13 +17,26 @@ def parse(html):
 	for row in main.find_all('article'):
 		title = row.find_all('header')
 		content = row.find_all('div')
+		time = row.find_all(class_='posted-on')
 		article_list.append({
 			'title': title[0].h2.a.text,
-			'content': [ content.text for content in content[0].find_all('p')]
+			'content': content[0].p.text,
+			'date_posted': time[0].time.text + ' 13:30:05',
+			'author': 1,
 		})
 
+	feeds = []
+
 	for article in article_list:
-		print(article)
+		with open('posts.json', mode='w') as feedsjson:
+			entry = {
+				'title': article['title'],
+				'content': article['content'],
+				'date_posted': article['date_posted'],
+				'author': article['author'],
+			}
+			feeds.append(entry)
+			json.dump(feeds, feedsjson, indent = 4, ensure_ascii = False)
 
 def main():
 	parse(get_html('http://murdalov.ru'))
